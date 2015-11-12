@@ -23,6 +23,7 @@ class MainWindow : public QMainWindow
 
 		MainWindow(QWidget *parent = 0);
 		~MainWindow();
+		void cpuRaycasting();
 
 	
 	protected slots :

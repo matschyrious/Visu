@@ -81,6 +81,9 @@ void MainWindow::openFileAction()
 			else if (m_FileType.type == VECTORFIELD) type = "VECTORFIELD";
 			else if (m_FileType.type == MULTIVARIATE) type = "MULTIVARIATE";
 			m_Ui->labelTop->setText("File LOADED [" + filename + "] - Type [" + type + "]");
+
+			//raycasting aufruf
+			cpuRaycasting();
 		}
 		else
 		{
@@ -93,4 +96,22 @@ void MainWindow::openFileAction()
 void MainWindow::closeAction()
 {
 	close();
+}
+
+void MainWindow::cpuRaycasting(){
+
+
+	std::vector<float> data(m_Volume->width()*m_Volume->height(), 0);
+
+	for (int x = 0; x < m_Volume->width(); x++){
+		for (int y = 0; y < m_Volume->height(); y++){
+
+			for (int d = 0; d < m_Volume->depth(); d++){
+				data[x*y] = std::fmax(data[x*y], m_Volume->voxel(x, y, d).getValue());
+			}
+		}
+	}
+
+	std::cout << "fertig mit max íntensity berechnung" << std::endl;
+
 }

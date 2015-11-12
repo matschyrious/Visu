@@ -1,5 +1,5 @@
-﻿Der Buildvorgang wurde am 12.11.2015 16:20:24 gestartet.
-     1>Projekt "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Projekt\Visualisierung1.vcxproj" auf Knoten "2", Build Ziel(e).
+﻿Der Buildvorgang wurde am 12.11.2015 18:54:56 gestartet.
+     1>Projekt "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\Visualisierung1.vcxproj" auf Knoten "2", Build Ziel(e).
      1>CustomBuild:
          MOC MainWindow.h
          UIC MainWindow.ui
@@ -21,9 +21,9 @@
          tmp\Win32\Debug\Vector.obj
          tmp\Win32\Debug\VectorField.obj
          tmp\Win32\Debug\Volume.obj
-         Visualisierung1.vcxproj -> C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Projekt\bin\Win32\Debug\Visualisierung1.exe
-     1>Die Erstellung des Projekts "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Projekt\Visualisierung1.vcxproj" ist abgeschlossen, Build Ziel(e).
+         Visualisierung1.vcxproj -> C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\bin\Win32\Debug\Visualisierung1.exe
+     1>Die Erstellung des Projekts "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\Visualisierung1.vcxproj" ist abgeschlossen, Build Ziel(e).
 
 Build erfolgreich.
 
-Verstrichene Zeit 00:00:07.83
+Verstrichene Zeit 00:00:20.36
