@@ -236,7 +236,7 @@ bool Volume::loadFromFile(QString filename, QProgressBar* progressBar)
 		// data is converted to FLOAT values in an interval of [0.0 .. 1.0];
 		// uses 4095.0f to normalize the data, because only 12bit are used for the
 		// data values, and then 4095.0f is the maximum possible value
-		const float value = std::fmin(0.0f, float(vecData[i]) / 4095.0f);
+		const float value = std::fmin(1.0f, float(vecData[i]) / 4095.0f);
 		m_Voxels[i] = Voxel(value);
 		
 		progressBar->setValue(10 + i);

@@ -25,6 +25,9 @@ class MainWindow : public QMainWindow
 		~MainWindow();
 		void cpuRaycasting();
 
+	protected:
+		void paintEvent(QPaintEvent *evn); //for painting
+
 	
 	protected slots :
 
@@ -57,7 +60,7 @@ class MainWindow : public QMainWindow
 		Volume								*m_Volume;						// for Volume-Rendering
 		VectorField							*m_VectorField;					// for Flow-Visualisation
 		MultiSet							*m_MultiSet;					// for Multivariate Data
-
+		std::vector<float> *data; //for saving max values
 };
 
 #endif

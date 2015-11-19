@@ -101,17 +101,50 @@ void MainWindow::closeAction()
 void MainWindow::cpuRaycasting(){
 
 
-	std::vector<float> data(m_Volume->width()*m_Volume->height(), 0);
+	data = new std::vector<float>(m_Volume->width()*m_Volume->height(), 0);
 
 	for (int x = 0; x < m_Volume->width(); x++){
 		for (int y = 0; y < m_Volume->height(); y++){
 
 			for (int d = 0; d < m_Volume->depth(); d++){
-				data[x*y] = std::fmax(data[x*y], m_Volume->voxel(x, y, d).getValue());
+				data->at(x + (y*m_Volume->width())) = std::fmax(data->at(x + (y*m_Volume->width())), m_Volume->voxel(x, y, d).getValue());
 			}
 		}
 	}
 
 	std::cout << "fertig mit max íntensity berechnung" << std::endl;
 
+	repaint();
+
+}
+
+void MainWindow::paintEvent(QPaintEvent *evn){
+
+	setAutoFillBackground(true);
+	QColor color = QColor(255, 0, 0);
+
+	if (m_Volume != nullptr && data != nullptr){
+
+		QPainter painter;
+		painter.begin(this);
+		painter.setRenderHint(QPainter::Antialiasing);
+
+		QPen pen = QPen();
+		pen.setColor(color);
+		painter.setPen(pen);
+
+
+		for (int x = 0; x < m_Volume->width(); x++){
+			for (int y = 0; y < m_Volume->height(); y++){
+				if (data->at(x + (y*m_Volume->width())) > 0){
+					color = QColor(255 - (255 * data->at(x + (y*m_Volume->width()))), 0, 0);
+					pen.setColor(color);
+					painter.setPen(pen);
+					painter.drawPoint(x + 10, y + 100);
+				}
+			}
+		}
+
+		painter.end();
+	}
 }
