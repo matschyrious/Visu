@@ -5,8 +5,10 @@
 #include <QPainter>
 
 
+
+
 MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent), m_Volume(0), m_VectorField(0)
+: QMainWindow(parent), m_Volume(0), m_VectorField(0)
 {
 	m_Ui = new Ui_MainWindow();
 	m_Ui->setupUi(this);
@@ -84,6 +86,8 @@ void MainWindow::openFileAction()
 
 			//raycasting aufruf
 			cpuRaycasting();
+
+			calculateGradient();
 		}
 		else
 		{
@@ -118,6 +122,8 @@ void MainWindow::cpuRaycasting(){
 
 }
 
+
+
 void MainWindow::paintEvent(QPaintEvent *evn){
 
 	setAutoFillBackground(true);
@@ -147,4 +153,129 @@ void MainWindow::paintEvent(QPaintEvent *evn){
 
 		painter.end();
 	}
+}
+
+
+void MainWindow::calculateGradient(){
+	int gx, gy,gz;
+	float sum;
+	gradient_Volume = *m_Volume;
+	
+	for (int x = 1; x < m_Volume->width(); x++){
+		for (int y = 1; y < m_Volume->height(); y++){
+			for (int z = 1; z < m_Volume->depth(); z++){
+
+				gx =  xGradient( x, y, z-1);
+				gx += xGradientMiddle(x, y, z);
+				gx += xGradient(x, y, z + 1);
+
+				gy = yGradient(x, y, z-1);
+				gy += yGradientMiddle(x, y, z);
+				gy += yGradient(x, y, z + 1);
+
+				gz = zGradient(x, y, z-1);
+				//gzMiddle is zero
+				gz += zGradientPlus(x, y, z + 1);
+				
+				sum = abs(gx) + abs(gy) + abs(gz);
+				sum = sum > 255 ? 255 : sum;
+				sum = sum < 0 ? 0 : sum;
+				gradient_Volume->voxel(x, y, z).setValue(sum);
+
+			}
+		}
+	}
+	std::cout << "fertig mit gradient berechnung" << std::endl;
+
+}
+
+
+// GX
+// -1 0 1
+// -2 0 2
+// -1 0 1
+int MainWindow::xGradient(int x, int y, int z)
+{   
+
+	return	(-1)* m_Volume->voxel(x - 1, y - 1, z).getValue() +
+			(-2)* m_Volume->voxel(x - 1, y, z).getValue() +
+			(-1)* m_Volume->voxel(x - 1, y + 1, z).getValue() +
+				m_Volume->voxel(x + 1, y - 1, z).getValue() +
+			2 * m_Volume->voxel(x + 1, y - 1, z).getValue() +
+				m_Volume->voxel(x + 1, y - 1, z).getValue();
+		
+}
+// -2 0 2
+// -4 0 4
+// -2 0 2
+int MainWindow::xGradientMiddle(int x, int y, int z)
+{
+
+	return	(-2)* m_Volume->voxel(x - 1, y - 1, z).getValue() +
+			(-4)* m_Volume->voxel(x - 1, y, z).getValue() +
+			(-2)* m_Volume->voxel(x - 1, y + 1, z).getValue() +
+			2*	m_Volume->voxel(x + 1, y - 1, z).getValue() +
+			4 * m_Volume->voxel(x + 1, y - 1, z).getValue() +
+			2*	m_Volume->voxel(x + 1, y - 1, z).getValue();
+
+}
+
+//GY
+// 1 2 1
+// 0 0 0
+//-1-2-1
+int MainWindow::yGradient(int x, int y, int z)
+{
+	return  m_Volume->voxel(x - 1, y - 1, z).getValue() +
+		2 * m_Volume->voxel(x, y - 1, z).getValue() +
+			m_Volume->voxel(x + 1, y - 1, z).getValue() -
+			m_Volume->voxel(x - 1, y + 1, z).getValue() -
+		2 * m_Volume->voxel(x, y + 1, z).getValue() -
+			m_Volume->voxel(x + 1, y + 1, z).getValue();
+
+}
+// 2 4 2
+// 0 0 0
+//-2-4-2
+int MainWindow::yGradientMiddle(int x, int y, int z)
+{
+ return 2* m_Volume->voxel(x - 1, y - 1, z).getValue() +
+		4* m_Volume->voxel(x, y - 1, z).getValue() +
+		2* m_Volume->voxel(x + 1, y - 1, z).getValue() -
+		2* m_Volume->voxel(x - 1, y + 1, z).getValue() -
+		4* m_Volume->voxel(x, y + 1, z).getValue() -
+		2* m_Volume->voxel(x + 1, y + 1, z).getValue();
+
+}
+
+//GZ
+//-1-2-1
+//-2-4-2
+//-1-2-1
+int MainWindow::zGradient(int x, int y, int z)
+{
+	return (-1) * m_Volume->voxel(x - 1, y - 1, z).getValue()
+			- 2 * m_Volume->voxel(x, y - 1, z).getValue()
+			-     m_Volume->voxel(x + 1, y - 1, z).getValue()
+			- 2 * m_Volume->voxel(x - 1, y, z).getValue()
+			- 4 * m_Volume->voxel(x, y, z).getValue()
+			- 2 * m_Volume->voxel(x + 1, y, z).getValue()
+			-     m_Volume->voxel(x - 1, y + 1, z).getValue()
+			- 2 * m_Volume->voxel(x, y + 1, z).getValue()
+			-     m_Volume->voxel(x + 1, y + 1, z).getValue();
+}
+//1 2 1
+//2 4 2
+//1 2 1
+int MainWindow::zGradientPlus(int x, int y, int z)
+{
+	return  m_Volume->voxel(x - 1, y - 1, z).getValue()
+		+ 2 * m_Volume->voxel(x, y - 1, z).getValue()
+		+ m_Volume->voxel(x + 1, y - 1, z).getValue()
+		+ 2 * m_Volume->voxel(x - 1, y, z).getValue()
+		+ 4 * m_Volume->voxel(x, y, z).getValue()
+		+ 2 * m_Volume->voxel(x + 1, y, z).getValue()
+		+ m_Volume->voxel(x - 1, y + 1, z).getValue()
+		+ 2 * m_Volume->voxel(x, y + 1, z).getValue()
+		+ m_Volume->voxel(x + 1, y + 1, z).getValue();
 }

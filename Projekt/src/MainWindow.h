@@ -19,48 +19,59 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
-	public:
+public:
 
-		MainWindow(QWidget *parent = 0);
-		~MainWindow();
-		void cpuRaycasting();
-
-	protected:
-		void paintEvent(QPaintEvent *evn); //for painting
-
+	MainWindow(QWidget *parent = 0);
+	~MainWindow();
+	void cpuRaycasting();
 	
+
+protected:
+	void paintEvent(QPaintEvent *evn);      //for painting
+	void calculateGradient();               //Gradientenberechnung
+	int xGradient(int x, int y, int z);
+	int yGradient(int x, int y, int z);
+	int zGradient(int x, int y, int z);
+	int xGradientMiddle(int x, int y, int z);
+	int yGradientMiddle(int x, int y, int z);
+	int zGradientPlus(int x, int y, int z);
+
+
 	protected slots :
 
-		void								 openFileAction();
-		void								 closeAction();
-		
-
-	private:
-
-		// USER INTERFACE ELEMENTS
-
-		Ui_MainWindow						*m_Ui;
+	void								 openFileAction();
+	void								 closeAction();
 
 
-		// DATA 
+private:
 
-		enum DataType
-		{
-			VOLUME					= 0,
-			VECTORFIELD				= 1,
-			MULTIVARIATE			= 2
-		};
+	// USER INTERFACE ELEMENTS
 
-		struct FileType
-		{
-			QString			filename;
-			DataType		type;
-		}									 m_FileType;
+	Ui_MainWindow						*m_Ui;
 
-		Volume								*m_Volume;						// for Volume-Rendering
-		VectorField							*m_VectorField;					// for Flow-Visualisation
-		MultiSet							*m_MultiSet;					// for Multivariate Data
-		std::vector<float> *data; //for saving max values
+
+	// DATA 
+
+	enum DataType
+	{
+		VOLUME = 0,
+		VECTORFIELD = 1,
+		MULTIVARIATE = 2
+	};
+
+	struct FileType
+	{
+		QString			filename;
+		DataType		type;
+	}									 m_FileType;
+
+	Volume								*m_Volume;						// for Volume-Rendering
+	VectorField							*m_VectorField;					// for Flow-Visualisation
+	MultiSet							*m_MultiSet;					// for Multivariate Data
+	std::vector<float> *data; //for saving max values
+
+	Volume								gradient_Volume;
+	int									sobel[3][3];
 };
 
 #endif
