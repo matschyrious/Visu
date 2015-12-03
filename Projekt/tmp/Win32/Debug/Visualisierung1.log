@@ -1,4 +1,4 @@
-﻿Der Buildvorgang wurde am 03.12.2015 09:16:17 gestartet.
+﻿Der Buildvorgang wurde am 03.12.2015 14:26:12 gestartet.
      1>Projekt "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\Visualisierung1.vcxproj" auf Knoten "2", Build Ziel(e).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Isrc /Igenerated /Ilib /Ilib\glew\include /Ilib\qt\include /Ilib\qt\include\QtCLucene /Ilib\qt\include\QtCore /Ilib\qt\include\QtGui /Ilib\qt\include\QtOpenGL /Ilib\qt\include\QtOpenGLExtensions /Ilib\qt\include\QtPlatformSupport /Ilib\qt\include\QtUiTools /Ilib\qt\include\QtWidgets /Ilib\qt\include\QtZlib /Ilib\glfw\include /Ilib\GLM /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"tmp\Win32\Debug\\" /Fd"tmp\Win32\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt src\MainWindow.cpp
@@ -16,4 +16,4 @@
 
 Build erfolgreich.
 
-Verstrichene Zeit 00:00:03.85
+Verstrichene Zeit 00:00:03.55

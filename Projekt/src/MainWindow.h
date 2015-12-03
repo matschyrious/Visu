@@ -21,50 +21,65 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
-	public:
+public:
 
-		MainWindow(QWidget *parent = 0);
-		~MainWindow();
-		void cpuRaycasting();
+	MainWindow(QWidget *parent = 0);
+	~MainWindow();
+	
 
+protected:
+	void calculateGradient();               //Gradientenberechnung
+	int xGradient(int x, int y, int z);
+	int yGradient(int x, int y, int z);
+	int zGradient(int x, int y, int z);
+	int xGradientMiddle(int x, int y, int z);
+	int yGradientMiddle(int x, int y, int z);
+	int zGradientPlus(int x, int y, int z);
 	
 	protected slots :
 
 		void								 openFileAction();
 		void								 closeAction();
+		//own slots
+		void cpuRaycasting();
 		void gpuRaycasting();
+
+
+private:
+
+	// USER INTERFACE ELEMENTS
+
+	Ui_MainWindow						*m_Ui;
+
+
+	// DATA 
+
+	enum DataType
+	{
+		VOLUME = 0,
+		VECTORFIELD = 1,
+		MULTIVARIATE = 2
+	};
+
+	struct FileType
+	{
+		QString			filename;
+		DataType		type;
+	}									 m_FileType;
+
+	Volume								*m_Volume;						// for Volume-Rendering
+	VectorField							*m_VectorField;					// for Flow-Visualisation
+	MultiSet							*m_MultiSet;					// for Multivariate Data
+	std::vector<float> *data; //for saving max values
 		
-
-	private:
-
-		// USER INTERFACE ELEMENTS
-
-		Ui_MainWindow						*m_Ui;
+	std::vector<float> *mipData; //for saving max values
+	std::vector<float> *alphaData; //for saving alpha values
+	std::vector<float> volume_points;
 
 
-		// DATA 
-
-		enum DataType
-		{
-			VOLUME					= 0,
-			VECTORFIELD				= 1,
-			MULTIVARIATE			= 2
-		};
-
-		struct FileType
-		{
-			QString			filename;
-			DataType		type;
-		}									 m_FileType;
-
-		Volume								*m_Volume;						// for Volume-Rendering
-		VectorField							*m_VectorField;					// for Flow-Visualisation
-		MultiSet							*m_MultiSet;					// for Multivariate Data
-		
-		std::vector<float> *mipData; //for saving max values
-		std::vector<float> *alphaData; //for saving alpha values
-		
-		std::vector<float> volume_points;
+	//Volume	gradient_Volume;
+	std::vector<float> *gradient_Volume;
+	int									sobel[3][3];
 };
 
 #endif

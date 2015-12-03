@@ -62,10 +62,10 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>90</y>
-      <width>158</width>
-      <height>78</height>
+      <x>20</x>
+      <y>140</y>
+      <width>391</width>
+      <height>221</height>
      </rect>
     </property>
     <property name="text">
@@ -75,23 +75,36 @@
    <widget class="QPushButton" name="pushButtonGPU">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>40</y>
-      <width>75</width>
+      <x>134</x>
+      <y>90</y>
+      <width>91</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>gpu</string>
+     <string>gpu raycasting</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QPushButton" name="pushButtonCPU">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>120</y>
-      <width>47</width>
-      <height>13</height>
+      <x>20</x>
+      <y>90</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>cpu raycasting</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelGradient">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>410</y>
+      <width>541</width>
+      <height>251</height>
      </rect>
     </property>
     <property name="text">

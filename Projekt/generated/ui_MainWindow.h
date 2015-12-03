@@ -36,7 +36,8 @@ public:
     QFrame *line;
     QLabel *label;
     QPushButton *pushButtonGPU;
-    QLabel *label_2;
+    QPushButton *pushButtonCPU;
+    QLabel *labelGradient;
     QMenuBar *menubar;
     QMenu *menuFile;
 
@@ -67,13 +68,16 @@ public:
         line->setFrameShadow(QFrame::Sunken);
         label = new QLabel(centralwidget);
         label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(10, 90, 158, 78));
+        label->setGeometry(QRect(20, 140, 391, 221));
         pushButtonGPU = new QPushButton(centralwidget);
         pushButtonGPU->setObjectName(QStringLiteral("pushButtonGPU"));
-        pushButtonGPU->setGeometry(QRect(20, 40, 75, 23));
-        label_2 = new QLabel(centralwidget);
-        label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setGeometry(QRect(430, 120, 47, 13));
+        pushButtonGPU->setGeometry(QRect(134, 90, 91, 23));
+        pushButtonCPU = new QPushButton(centralwidget);
+        pushButtonCPU->setObjectName(QStringLiteral("pushButtonCPU"));
+        pushButtonCPU->setGeometry(QRect(20, 90, 91, 23));
+        labelGradient = new QLabel(centralwidget);
+        labelGradient->setObjectName(QStringLiteral("labelGradient"));
+        labelGradient->setGeometry(QRect(20, 410, 541, 251));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
@@ -99,8 +103,9 @@ public:
         actionClose->setText(QApplication::translate("MainWindow", "Close", 0));
         labelTop->setText(QApplication::translate("MainWindow", "No data loaded", 0));
         label->setText(QString());
-        pushButtonGPU->setText(QApplication::translate("MainWindow", "gpu", 0));
-        label_2->setText(QString());
+        pushButtonGPU->setText(QApplication::translate("MainWindow", "gpu raycasting", 0));
+        pushButtonCPU->setText(QApplication::translate("MainWindow", "cpu raycasting", 0));
+        labelGradient->setText(QString());
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
     } // retranslateUi
 
