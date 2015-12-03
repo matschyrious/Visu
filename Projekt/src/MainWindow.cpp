@@ -1,8 +1,145 @@
+
 #include "MainWindow.h"
 
 #include <QFileDialog>
-
 #include <QPainter>
+#include <QApplication>
+#include <QMessageBox>
+#include <QtOpenGL>
+#include <QGLWidget>
+#include <QGLBuffer>
+#include <QGLShader>
+
+class GLWidget : public QGLWidget
+{
+public:
+	GLWidget(const QGLFormat& format, QWidget *parent, std::vector<GLfloat> _volume_data);
+
+protected:
+	virtual void initializeGL();
+	virtual void resizeGL(int w, int h);
+	virtual void paintGL();
+
+	virtual void keyPressEvent(QKeyEvent * e);
+
+private:
+	QGLShaderProgram program;
+	QGLBuffer m_vertexBuffer;
+	std::vector<GLfloat> volume_data;
+	QMatrix4x4 matrix;
+};
+
+GLWidget::GLWidget(const QGLFormat& format, QWidget *parent, std::vector<GLfloat> _volume_data)
+	: QGLWidget(format), volume_data(_volume_data), m_vertexBuffer(QGLBuffer::VertexBuffer)
+{
+	setWindowTitle(tr("GPU Raycasting"));
+
+}
+
+void GLWidget::initializeGL()
+{
+	QGLFormat glFormat = QGLWidget::format();
+	if (!glFormat.sampleBuffers())
+		qWarning() << "Could not enable sample buffers";
+
+	// Set the clear color to black
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Prepare a complete shader program…
+	program.addShaderFromSourceCode(QGLShader::Vertex,
+		"#version 330 \n"
+		"in vec4 vertex;\n"
+		"uniform mat4 matrix;\n"
+		"void main(void)\n"
+		"{ \n"
+		"vec4 n_vertex = normalize(vertex);"
+		"gl_Position = matrix *n_vertex;\n"
+		"}");
+	program.addShaderFromSourceCode(QGLShader::Fragment,
+		"#version 330 \n"
+		"layout(location = 0, index = 0) out vec4 fragColor;\n"
+		"void main(void)\n"
+		"{ \n"
+		"fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+		"}");
+
+	program.link();
+
+	m_vertexBuffer.create();
+	m_vertexBuffer.setUsagePattern(QGLBuffer::StaticDraw);
+
+	if (!m_vertexBuffer.bind())
+	{
+		qWarning() << "Could not bind vertex buffer to the context";
+		return;
+	}
+	m_vertexBuffer.allocate(&volume_data[0], volume_data.size()* sizeof(float));
+
+	// Bind the shader program so that we can associate variables from
+	// our application to the shaders
+	if (!program.bind())
+	{
+		qWarning() << "Could not bind shader program to context";
+		return;
+	}
+
+	// Enable the "vertex" attribute to bind it to our currently bound
+	// vertex buffer.
+	matrix = QMatrix4x4(1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1);
+
+	program.setUniformValue("matrix", matrix);
+	program.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
+	program.enableAttributeArray("vertex");
+}
+
+void GLWidget::resizeGL(int w, int h)
+{
+	// Set the viewport to window dimensions
+	glViewport(0, 0, w, qMax(h, 1));
+}
+
+void GLWidget::paintGL()
+{
+
+	// Clear the buffer with the current clearing color
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	m_vertexBuffer.bind();
+	program.setUniformValue("matrix", matrix);
+	program.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
+	program.enableAttributeArray("vertex");
+
+	// Draw stuff
+	glDrawArrays(GL_POINTS, 0, volume_data.size());
+}
+
+void GLWidget::keyPressEvent(QKeyEvent* e)
+{
+	switch (e->key())
+	{
+	case Qt::Key_Escape:
+		QCoreApplication::instance()->quit();
+		break;
+
+	case Qt::Key_X:
+		matrix.rotate(10, 1,0,0);
+		updateGL();
+		break;
+	case Qt::Key_Y:
+		matrix.rotate(10, 0, 1, 0);
+		updateGL();
+		break;
+	case Qt::Key_Z:
+		matrix.rotate(10, 0, 0, 1);
+		updateGL();
+		break;
+	default:
+		QGLWidget::keyPressEvent(e);
+	}
+}
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -13,6 +150,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(m_Ui->actionOpen, SIGNAL(triggered()), this, SLOT(openFileAction()));
 	connect(m_Ui->actionClose, SIGNAL(triggered()), this, SLOT(closeAction()));
+	connect(m_Ui->pushButtonGPU, SIGNAL(clicked()), this, SLOT(gpuRaycasting()));
 }
 
 MainWindow::~MainWindow()
@@ -99,52 +237,107 @@ void MainWindow::closeAction()
 }
 
 void MainWindow::cpuRaycasting(){
+	
+	mipData = new std::vector<float>(m_Volume->width()*m_Volume->height(), 0);
 
+	QImage mip = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_RGB32);
+	
+	QImage alphaImg = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_ARGB32);
+	QImage alphaImgA = alphaImg.alphaChannel();
 
-	data = new std::vector<float>(m_Volume->width()*m_Volume->height(), 0);
 
 	for (int x = 0; x < m_Volume->width(); x++){
 		for (int y = 0; y < m_Volume->height(); y++){
 
+			float alpha = 0;
+			
 			for (int d = 0; d < m_Volume->depth(); d++){
-				data->at(x + (y*m_Volume->width())) = std::fmax(data->at(x + (y*m_Volume->width())), m_Volume->voxel(x, y, d).getValue());
+
+				float voxel = m_Volume->voxel(x, y, d).getValue();
+
+				//MIP
+				mipData->at(x + (y*m_Volume->width())) = 
+					std::fmax(mipData->at(x + (y*m_Volume->width())),voxel);
+					
+				
+				//alpha 
+				/*
+				if (alpha <= 255){
+					if (voxel > 0){
+						
+						alphaImg.setPixel(x, y, qRgb(255 -(255* voxel), 255-(255*voxel), 255 * voxel ));
+						alpha += 255 * m_Volume->voxel(x, y, d).getValue();
+					}
+				}*/
+
+			}
+			if (mipData->at(x + (y*m_Volume->width())) <= 0001){
+				mip.setPixel(x, y, qRgb(255 * (255 - mipData->at(x + (y*m_Volume->width()))), 0, 0));
+			}
+
+		}
+	}
+	
+
+	//m_Ui->label_2->setPixmap(QPixmap::fromImage(alphaImg));
+	//m_Ui->label_2->setFixedSize(alphaImg.size());
+
+
+	m_Ui->label->setPixmap(QPixmap::fromImage(mip));
+	m_Ui->label->setFixedSize(mip.size());
+
+	std::cout << "fertig mit max íntensity berechnung" << std::endl;
+
+}
+
+void MainWindow::gpuRaycasting(){
+
+	volume_points.clear();
+	
+	for (int x = 0; x < m_Volume->width(); x++){
+		for (int y = 0; y < m_Volume->height(); y++){
+			for (int z = 0; z < m_Volume->depth(); z++){
+				if (m_Volume->voxel(x, y, z).getValue() > 0){
+					if (x == m_Volume->width()/2){
+						std::cout << "x y z " << m_Volume->voxel(x, y, z).getValue() << std::endl;
+					}
+						volume_points.push_back((float)(-(m_Volume->width() / 2) + x) / m_Volume->width() / 2);
+						volume_points.push_back((float)(-(m_Volume->height() / 2) + y) / m_Volume->height() / 2);
+						volume_points.push_back((float)(-(m_Volume->depth() / 2) + z) / m_Volume->depth() / 2);
+						volume_points.push_back(1.0f);
+				}
 			}
 		}
 	}
 
-	std::cout << "fertig mit max íntensity berechnung" << std::endl;
-
-	repaint();
-
-}
-
-void MainWindow::paintEvent(QPaintEvent *evn){
-
-	setAutoFillBackground(true);
-	QColor color = QColor(255, 0, 0);
-
-	if (m_Volume != nullptr && data != nullptr){
-
-		QPainter painter;
-		painter.begin(this);
-		painter.setRenderHint(QPainter::Antialiasing);
-
-		QPen pen = QPen();
-		pen.setColor(color);
-		painter.setPen(pen);
-
-
-		for (int x = 0; x < m_Volume->width(); x++){
-			for (int y = 0; y < m_Volume->height(); y++){
-				if (data->at(x + (y*m_Volume->width())) > 0){
-					color = QColor(255 - (255 * data->at(x + (y*m_Volume->width()))), 0, 0);
-					pen.setColor(color);
-					painter.setPen(pen);
-					painter.drawPoint(x + 10, y + 100);
-				}
-			}
+	if (volume_points.size() > 0){
+		QGLFormat f = QGLFormat::defaultFormat();
+		f.setSampleBuffers(true);
+		QGLFormat::setDefaultFormat(f);
+		if (!QGLFormat::hasOpenGL()) {
+			QMessageBox::information(0, "OpenGL samplebuffers",
+				"This system does not support OpenGL.");
 		}
 
-		painter.end();
+		QGLFormat glFormat;
+		glFormat.setVersion(3, 3);
+		glFormat.setProfile(QGLFormat::CoreProfile); // Requires >=Qt-4.8.0
+		glFormat.setSampleBuffers(true);
+
+		// Create a GLWidget requesting our format
+		GLWidget widget(glFormat, 0, volume_points);
+
+		if (!widget.format().sampleBuffers()) {
+			QMessageBox::information(0, "OpenGL samplebuffers",
+				"This system does not have sample buffer support.");
+		}
+
+		widget.resize(640, 480);
+		
+		do{
+			widget.show();
+			qApp->processEvents();
+		} while (widget.isVisible());
+		
 	}
 }

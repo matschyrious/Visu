@@ -20,6 +20,7 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QProgressBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -33,6 +34,9 @@ public:
     QLabel *labelTop;
     QProgressBar *progressBar;
     QFrame *line;
+    QLabel *label;
+    QPushButton *pushButtonGPU;
+    QLabel *label_2;
     QMenuBar *menubar;
     QMenu *menuFile;
 
@@ -58,9 +62,18 @@ public:
         progressBar->setTextVisible(false);
         line = new QFrame(centralwidget);
         line->setObjectName(QStringLiteral("line"));
-        line->setGeometry(QRect(0, 50, 1011, 20));
+        line->setGeometry(QRect(0, 60, 1011, 20));
         line->setFrameShape(QFrame::HLine);
         line->setFrameShadow(QFrame::Sunken);
+        label = new QLabel(centralwidget);
+        label->setObjectName(QStringLiteral("label"));
+        label->setGeometry(QRect(10, 90, 158, 78));
+        pushButtonGPU = new QPushButton(centralwidget);
+        pushButtonGPU->setObjectName(QStringLiteral("pushButtonGPU"));
+        pushButtonGPU->setGeometry(QRect(20, 40, 75, 23));
+        label_2 = new QLabel(centralwidget);
+        label_2->setObjectName(QStringLiteral("label_2"));
+        label_2->setGeometry(QRect(430, 120, 47, 13));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
@@ -85,6 +98,9 @@ public:
         actionOpen->setText(QApplication::translate("MainWindow", "Open ...", 0));
         actionClose->setText(QApplication::translate("MainWindow", "Close", 0));
         labelTop->setText(QApplication::translate("MainWindow", "No data loaded", 0));
+        label->setText(QString());
+        pushButtonGPU->setText(QApplication::translate("MainWindow", "gpu", 0));
+        label_2->setText(QString());
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
     } // retranslateUi
 
