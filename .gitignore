@@ -1,3 +1,5 @@
-/Projekt/*
+/Projekt/bin
+/Projekt/build*
 /Projekt/*.sdf
 /Projekt/*.user
+/Projekt/*.suo
