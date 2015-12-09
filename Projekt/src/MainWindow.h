@@ -26,7 +26,7 @@ public:
 
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
-	
+
 
 protected:
 	void calculateGradient();               //Gradientenberechnung
@@ -36,14 +36,16 @@ protected:
 	float xGradientMiddle(int x, int y, int z);
 	float yGradientMiddle(int x, int y, int z);
 	float zGradientPlus(int x, int y, int z);
-	
+
 	protected slots :
 
-		void								 openFileAction();
-		void								 closeAction();
-		//own slots
-		void cpuRaycasting();
-		void gpuRaycasting();
+	void								 openFileAction();
+	void								 closeAction();
+	//own slots
+	void cpuRaycasting();
+	void gpuRaycasting();
+
+	void firstHitRaycasting();
 
 
 private:
@@ -72,15 +74,18 @@ private:
 	VectorField							*m_VectorField;					// for Flow-Visualisation
 	MultiSet							*m_MultiSet;					// for Multivariate Data
 	std::vector<float> *data; //for saving max values
-		
+
 	std::vector<float> *mipData; //for saving max values
+	
 	std::vector<float> *alphaData; //for saving alpha values
+	std::vector<float> *firstHitData; //for saving max values
+
 	std::vector<float> volume_points;
 
 
 	//Volume	gradient_Volume;
 	std::vector<float> *gradient_Volume;
-	
+
 };
 
 #endif
