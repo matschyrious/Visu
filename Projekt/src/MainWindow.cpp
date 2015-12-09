@@ -9,6 +9,7 @@
 #include <QGLWidget>
 #include <QGLBuffer>
 #include <QGLShader>
+#include <array>
 
 class GLWidget : public QGLWidget
 {
@@ -356,31 +357,41 @@ void MainWindow::calculateGradient(){
 
 	QImage gradient = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_RGB32);
 	//gradient_Volume = *m_Volume;
-	gradient_Volume = new std::vector<float>(m_Volume->width()*m_Volume->height()*m_Volume->depth(),0);
+	gradient_Volume;
+	QVector3D gradient_ , gradienten;
+	std::array<std::array<std::array<QVector3D, 200>, 200>, 200> gradienten_array;
+
 	
 	for (int x = 1; x < m_Volume->width()-1; x++){
 		for (int y = 1; y < m_Volume->height()-1; y++){
-			for (int z = 1; z < m_Volume->depth()-1; z++){
+			for (int z = 1; z < m_Volume->depth() - 1; z++){
 
-				gx =  xGradient( x, y, z-1);
+				gx = xGradient(x, y, z - 1);
 				gx += xGradientMiddle(x, y, z);
 				gx += xGradient(x, y, z + 1);
+				gx = abs(gx);
 
-				gy = yGradient(x, y, z-1);
+				gy = yGradient(x, y, z - 1);
 				gy += yGradientMiddle(x, y, z);
 				gy += yGradient(x, y, z + 1);
+				gy = abs(gy);
 
-				gz = zGradient(x, y, z-1);
+				gz = zGradient(x, y, z - 1);
 				//gzMiddle is zero
 				gz += zGradientPlus(x, y, z + 1);
+				gz = abs(gz);
+				//alle g in vec3 speichern
 				
-				sum = abs(gx) + abs(gy) + abs(gz);
-				sum = sum > 255 ? 255 : sum;
-				sum = sum < 0 ? 0 : sum;
-				if (sum > 0){
-					gradient_Volume->at(x + (y *m_Volume->width()) + (z*m_Volume->width()*m_Volume->height())) = sum;
-					gradient.setPixel(x, y, qRgb(0, 255, 0));
+				gradient_ = QVector3D(gx, gy, gz);
+				if (gx != 0 || gy != 0 || gz != 0){
+					gradienten_array[x][y][z].setX(gx);
+					gradienten_array[x][y][z].setY(gy);
+					gradienten_array[x][y][z].setZ(gz);
+
 				}
+				//gradient_Volume->at(x + (y *m_Volume->width()) + (z*m_Volume->width()*m_Volume->height())) = gradient_;
+				gradient.setPixel(x, y, qRgb(0, 255, 0));
+				
 				
 			}
 		}
@@ -398,7 +409,7 @@ void MainWindow::calculateGradient(){
 // -1 0 1
 // -2 0 2
 // -1 0 1
-int MainWindow::xGradient(int x, int y, int z)
+float MainWindow::xGradient(int x, int y, int z)
 {   
 
 	return	(-1)* m_Volume->voxel(x - 1, y - 1, z).getValue() +
@@ -412,7 +423,7 @@ int MainWindow::xGradient(int x, int y, int z)
 // -2 0 2
 // -4 0 4
 // -2 0 2
-int MainWindow::xGradientMiddle(int x, int y, int z)
+float MainWindow::xGradientMiddle(int x, int y, int z)
 {
 
 	return	(-2)* m_Volume->voxel(x - 1, y - 1, z).getValue() +
@@ -428,7 +439,7 @@ int MainWindow::xGradientMiddle(int x, int y, int z)
 // 1 2 1
 // 0 0 0
 //-1-2-1
-int MainWindow::yGradient(int x, int y, int z)
+float MainWindow::yGradient(int x, int y, int z)
 {
 	return  m_Volume->voxel(x - 1, y - 1, z).getValue() +
 		2 * m_Volume->voxel(x, y - 1, z).getValue() +
@@ -441,7 +452,7 @@ int MainWindow::yGradient(int x, int y, int z)
 // 2 4 2
 // 0 0 0
 //-2-4-2
-int MainWindow::yGradientMiddle(int x, int y, int z)
+float MainWindow::yGradientMiddle(int x, int y, int z)
 {
  return 2* m_Volume->voxel(x - 1, y - 1, z).getValue() +
 		4* m_Volume->voxel(x, y - 1, z).getValue() +
@@ -456,7 +467,7 @@ int MainWindow::yGradientMiddle(int x, int y, int z)
 //-1-2-1
 //-2-4-2
 //-1-2-1
-int MainWindow::zGradient(int x, int y, int z)
+float MainWindow::zGradient(int x, int y, int z)
 {
 	return (-1) * m_Volume->voxel(x - 1, y - 1, z).getValue()
 			- 2 * m_Volume->voxel(x, y - 1, z).getValue()
@@ -471,7 +482,7 @@ int MainWindow::zGradient(int x, int y, int z)
 //1 2 1
 //2 4 2
 //1 2 1
-int MainWindow::zGradientPlus(int x, int y, int z)
+float MainWindow::zGradientPlus(int x, int y, int z)
 {
 	return  m_Volume->voxel(x - 1, y - 1, z).getValue()
 		+ 2 * m_Volume->voxel(x, y - 1, z).getValue()

@@ -6,6 +6,7 @@
 #include "Volume.h"
 #include "VectorField.h"
 #include "MultiSet.h"
+#include "Vector.h"
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -14,7 +15,7 @@
 #include <QStatusBar>
 #include <QVariant>
 
-#include <glm.hpp>
+//#include <glm.hpp>
 
 
 class MainWindow : public QMainWindow
@@ -29,12 +30,12 @@ public:
 
 protected:
 	void calculateGradient();               //Gradientenberechnung
-	int xGradient(int x, int y, int z);
-	int yGradient(int x, int y, int z);
-	int zGradient(int x, int y, int z);
-	int xGradientMiddle(int x, int y, int z);
-	int yGradientMiddle(int x, int y, int z);
-	int zGradientPlus(int x, int y, int z);
+	float xGradient(int x, int y, int z);
+	float yGradient(int x, int y, int z);
+	float zGradient(int x, int y, int z);
+	float xGradientMiddle(int x, int y, int z);
+	float yGradientMiddle(int x, int y, int z);
+	float zGradientPlus(int x, int y, int z);
 	
 	protected slots :
 
@@ -79,7 +80,7 @@ private:
 
 	//Volume	gradient_Volume;
 	std::vector<float> *gradient_Volume;
-	int									sobel[3][3];
+	
 };
 
 #endif
