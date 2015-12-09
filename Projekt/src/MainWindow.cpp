@@ -9,6 +9,7 @@
 #include <QGLWidget>
 #include <QGLBuffer>
 #include <QGLShader>
+#include <array>
 
 #include <gl\GL.h>
 
@@ -171,7 +172,7 @@ void GLWidget::keyPressEvent(QKeyEvent* e)
 		break;
 
 	case Qt::Key_X:
-		matrix.rotate(10, 1,0,0);
+		matrix.rotate(10, 1, 0, 0);
 		updateGL();
 		break;
 	case Qt::Key_Y:
@@ -200,10 +201,12 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_Ui->actionClose, SIGNAL(triggered()), this, SLOT(closeAction()));
 	connect(m_Ui->pushButtonCPU, SIGNAL(clicked()), this, SLOT(cpuRaycasting()));
 	connect(m_Ui->pushButtonGPU, SIGNAL(clicked()), this, SLOT(gpuRaycasting()));
+	connect(m_Ui->pushButtonFirstHit, SIGNAL(clicked()), this, SLOT(firstHitRaycasting()));
 
 	if (m_Volume == nullptr){
 		m_Ui->pushButtonCPU->setDisabled(true);
 		m_Ui->pushButtonGPU->setDisabled(true);
+		m_Ui->pushButtonFirstHit->setDisabled(true);
 	}
 }
 
@@ -276,8 +279,9 @@ void MainWindow::openFileAction()
 
 			m_Ui->pushButtonCPU->setDisabled(false);
 			m_Ui->pushButtonGPU->setDisabled(false);
+			m_Ui->pushButtonFirstHit->setDisabled(false);
 
-			//calculateGradient();
+			calculateGradient();
 		}
 		else
 		{
@@ -351,8 +355,8 @@ void MainWindow::cpuRaycasting(){
 			
 
 			float intensity = mipData->at(x + (y*m_Volume->width()));
-			mip.setPixel(x, y, qRgb(0, 0, 255*intensity));
-			
+			mip.setPixel(x, y, qRgb(0, 0, 255 * intensity));
+
 
 		}
 	}
@@ -366,7 +370,39 @@ void MainWindow::cpuRaycasting(){
 
 }
 
+void MainWindow::firstHitRaycasting(){
+
+	firstHitData = new std::vector<float>(m_Volume->width()*m_Volume->height(), 0);
+
+	QImage firstHit = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_RGB32);
+	float density, threshold = 0.5;
+	
+	for (int x = 0; x < m_Volume->width(); x++){
+		for (int y = 0; y < m_Volume->height(); y++){
+			for (int z = 0; z < m_Volume->depth(); z++){
+
+				float voxel = m_Volume->voxel(x, y, z).getValue();
+				density = m_Volume->voxel(x, y, z).getValue();
+				//firstHitData->at(x + (y*m_Volume->width())) =
+				//	std::fmax(firstHitData->at(x + (y*m_Volume->width())), voxel);
+				if (density > 0){
+					firstHitData->at(x + (y*m_Volume->width())) = density;
+				}
+			}
+			float intensity = firstHitData->at(x + (y*m_Volume->width()));
+			firstHit.setPixel(x, y, qRgb(0, 0, 255 * intensity));
+		}
+	}
+
+	//m_Ui->firstHit_label->setPixmap(QPixmap::fromImage(firstHit.scaled()*2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+	m_Ui->firstHit_label->setPixmap(QPixmap::fromImage(firstHit));
+
+	m_Ui->firstHit_label->setFixedSize(firstHit.size()*2);
+
+}
+
 void MainWindow::gpuRaycasting(){
+
 
 	if (m_Volume->size() > 0){
 		QGLFormat f = QGLFormat::defaultFormat();
@@ -391,48 +427,57 @@ void MainWindow::gpuRaycasting(){
 		}
 
 		widget.resize(640, 480);
-		
+
 		do{
 			widget.show();
 			qApp->processEvents();
 		} while (widget.isVisible());
-		
+
 	}
 }
 
 
 void MainWindow::calculateGradient(){
-	int gx, gy,gz;
+	int gx, gy, gz;
 	float sum;
 
 	QImage gradient = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_RGB32);
 	//gradient_Volume = *m_Volume;
-	gradient_Volume = new std::vector<float>(m_Volume->width()*m_Volume->height()*m_Volume->depth(),0);
-	
-	for (int x = 1; x < m_Volume->width()-1; x++){
-		for (int y = 1; y < m_Volume->height()-1; y++){
-			for (int z = 1; z < m_Volume->depth()-1; z++){
+	gradient_Volume;
+	QVector3D gradient_;
 
-				gx =  xGradient( x, y, z-1);
+
+	for (int x = 1; x < m_Volume->width() - 1; x++){
+		for (int y = 1; y < m_Volume->height() - 1; y++){
+			for (int z = 1; z < m_Volume->depth() - 1; z++){
+
+				gx = xGradient(x, y, z - 1);
 				gx += xGradientMiddle(x, y, z);
 				gx += xGradient(x, y, z + 1);
+				gx = abs(gx);
 
-				gy = yGradient(x, y, z-1);
+				gy = yGradient(x, y, z - 1);
 				gy += yGradientMiddle(x, y, z);
 				gy += yGradient(x, y, z + 1);
+				gy = abs(gy);
 
-				gz = zGradient(x, y, z-1);
+				gz = zGradient(x, y, z - 1);
 				//gzMiddle is zero
 				gz += zGradientPlus(x, y, z + 1);
-				
-				sum = abs(gx) + abs(gy) + abs(gz);
-				sum = sum > 255 ? 255 : sum;
-				sum = sum < 0 ? 0 : sum;
-				if (sum > 0){
-					gradient_Volume->at(x + (y *m_Volume->width()) + (z*m_Volume->width()*m_Volume->height())) = sum;
-					gradient.setPixel(x, y, qRgb(0, 255, 0));
+				gz = abs(gz);
+				//alle g in vec3 speichern
+
+				gradient_ = QVector3D(gx, gy, gz);
+				if (gx != 0 || gy != 0 || gz != 0){
+			/*		gradienten_array[x*y*z].setX(gx);
+					gradienten_array[x*y*z].setY(gy);
+					gradienten_array[x*y*z].setZ(gz);
+			*/
 				}
-				
+				//gradient_Volume->at(x + (y *m_Volume->width()) + (z*m_Volume->width()*m_Volume->height())) = gradient_;
+				gradient.setPixel(x, y, qRgb(0, 255, 0));
+
+
 			}
 		}
 	}
@@ -449,29 +494,29 @@ void MainWindow::calculateGradient(){
 // -1 0 1
 // -2 0 2
 // -1 0 1
-int MainWindow::xGradient(int x, int y, int z)
-{   
+float MainWindow::xGradient(int x, int y, int z)
+{
 
 	return	(-1)* m_Volume->voxel(x - 1, y - 1, z).getValue() +
-			(-2)* m_Volume->voxel(x - 1, y, z).getValue() +
-			(-1)* m_Volume->voxel(x - 1, y + 1, z).getValue() +
-				m_Volume->voxel(x + 1, y - 1, z).getValue() +
-			2 * m_Volume->voxel(x + 1, y - 1, z).getValue() +
-				m_Volume->voxel(x + 1, y - 1, z).getValue();
-		
+		(-2)* m_Volume->voxel(x - 1, y, z).getValue() +
+		(-1)* m_Volume->voxel(x - 1, y + 1, z).getValue() +
+		m_Volume->voxel(x + 1, y - 1, z).getValue() +
+		2 * m_Volume->voxel(x + 1, y - 1, z).getValue() +
+		m_Volume->voxel(x + 1, y - 1, z).getValue();
+
 }
 // -2 0 2
 // -4 0 4
 // -2 0 2
-int MainWindow::xGradientMiddle(int x, int y, int z)
+float MainWindow::xGradientMiddle(int x, int y, int z)
 {
 
 	return	(-2)* m_Volume->voxel(x - 1, y - 1, z).getValue() +
-			(-4)* m_Volume->voxel(x - 1, y, z).getValue() +
-			(-2)* m_Volume->voxel(x - 1, y + 1, z).getValue() +
-			2*	m_Volume->voxel(x + 1, y - 1, z).getValue() +
-			4 * m_Volume->voxel(x + 1, y - 1, z).getValue() +
-			2*	m_Volume->voxel(x + 1, y - 1, z).getValue();
+		(-4)* m_Volume->voxel(x - 1, y, z).getValue() +
+		(-2)* m_Volume->voxel(x - 1, y + 1, z).getValue() +
+		2 * m_Volume->voxel(x + 1, y - 1, z).getValue() +
+		4 * m_Volume->voxel(x + 1, y - 1, z).getValue() +
+		2 * m_Volume->voxel(x + 1, y - 1, z).getValue();
 
 }
 
@@ -479,27 +524,27 @@ int MainWindow::xGradientMiddle(int x, int y, int z)
 // 1 2 1
 // 0 0 0
 //-1-2-1
-int MainWindow::yGradient(int x, int y, int z)
+float MainWindow::yGradient(int x, int y, int z)
 {
 	return  m_Volume->voxel(x - 1, y - 1, z).getValue() +
 		2 * m_Volume->voxel(x, y - 1, z).getValue() +
-			m_Volume->voxel(x + 1, y - 1, z).getValue() -
-			m_Volume->voxel(x - 1, y + 1, z).getValue() -
+		m_Volume->voxel(x + 1, y - 1, z).getValue() -
+		m_Volume->voxel(x - 1, y + 1, z).getValue() -
 		2 * m_Volume->voxel(x, y + 1, z).getValue() -
-			m_Volume->voxel(x + 1, y + 1, z).getValue();
+		m_Volume->voxel(x + 1, y + 1, z).getValue();
 
 }
 // 2 4 2
 // 0 0 0
 //-2-4-2
-int MainWindow::yGradientMiddle(int x, int y, int z)
+float MainWindow::yGradientMiddle(int x, int y, int z)
 {
- return 2* m_Volume->voxel(x - 1, y - 1, z).getValue() +
-		4* m_Volume->voxel(x, y - 1, z).getValue() +
-		2* m_Volume->voxel(x + 1, y - 1, z).getValue() -
-		2* m_Volume->voxel(x - 1, y + 1, z).getValue() -
-		4* m_Volume->voxel(x, y + 1, z).getValue() -
-		2* m_Volume->voxel(x + 1, y + 1, z).getValue();
+	return 2 * m_Volume->voxel(x - 1, y - 1, z).getValue() +
+		4 * m_Volume->voxel(x, y - 1, z).getValue() +
+		2 * m_Volume->voxel(x + 1, y - 1, z).getValue() -
+		2 * m_Volume->voxel(x - 1, y + 1, z).getValue() -
+		4 * m_Volume->voxel(x, y + 1, z).getValue() -
+		2 * m_Volume->voxel(x + 1, y + 1, z).getValue();
 
 }
 
@@ -507,22 +552,22 @@ int MainWindow::yGradientMiddle(int x, int y, int z)
 //-1-2-1
 //-2-4-2
 //-1-2-1
-int MainWindow::zGradient(int x, int y, int z)
+float MainWindow::zGradient(int x, int y, int z)
 {
 	return (-1) * m_Volume->voxel(x - 1, y - 1, z).getValue()
-			- 2 * m_Volume->voxel(x, y - 1, z).getValue()
-			-     m_Volume->voxel(x + 1, y - 1, z).getValue()
-			- 2 * m_Volume->voxel(x - 1, y, z).getValue()
-			- 4 * m_Volume->voxel(x, y, z).getValue()
-			- 2 * m_Volume->voxel(x + 1, y, z).getValue()
-			-     m_Volume->voxel(x - 1, y + 1, z).getValue()
-			- 2 * m_Volume->voxel(x, y + 1, z).getValue()
-			-     m_Volume->voxel(x + 1, y + 1, z).getValue();
+		- 2 * m_Volume->voxel(x, y - 1, z).getValue()
+		- m_Volume->voxel(x + 1, y - 1, z).getValue()
+		- 2 * m_Volume->voxel(x - 1, y, z).getValue()
+		- 4 * m_Volume->voxel(x, y, z).getValue()
+		- 2 * m_Volume->voxel(x + 1, y, z).getValue()
+		- m_Volume->voxel(x - 1, y + 1, z).getValue()
+		- 2 * m_Volume->voxel(x, y + 1, z).getValue()
+		- m_Volume->voxel(x + 1, y + 1, z).getValue();
 }
 //1 2 1
 //2 4 2
 //1 2 1
-int MainWindow::zGradientPlus(int x, int y, int z)
+float MainWindow::zGradientPlus(int x, int y, int z)
 {
 	return  m_Volume->voxel(x - 1, y - 1, z).getValue()
 		+ 2 * m_Volume->voxel(x, y - 1, z).getValue()

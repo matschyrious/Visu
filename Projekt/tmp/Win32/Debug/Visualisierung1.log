@@ -1,26 +1,34 @@
-﻿Der Buildvorgang wurde am 09.12.2015 13:38:55 gestartet.
-     1>Projekt "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\Visualisierung1.vcxproj" auf Knoten "2", Build Ziel(e).
+﻿Der Buildvorgang wurde am 09.12.2015 13:46:10 gestartet.
+     1>Projekt "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\Visualisierung1.vcxproj" auf Knoten "2", Rebuild Ziel(e).
      1>CustomBuild:
+         MOC MainWindow.h
          UIC MainWindow.ui
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Isrc /Igenerated /Ilib /Ilib\glew\include /Ilib\qt\include /Ilib\qt\include\QtCLucene /Ilib\qt\include\QtCore /Ilib\qt\include\QtGui /Ilib\qt\include\QtOpenGL /Ilib\qt\include\QtOpenGLExtensions /Ilib\qt\include\QtPlatformSupport /Ilib\qt\include\QtUiTools /Ilib\qt\include\QtWidgets /Ilib\qt\include\QtZlib /Ilib\glfw\include /Ilib\GLM /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"tmp\Win32\Debug\\" /Fd"tmp\Win32\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt generated\moc_MainWindow.cpp src\Main.cpp src\MainWindow.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Isrc /Igenerated /Ilib /Ilib\glew\include /Ilib\qt\include /Ilib\qt\include\QtCLucene /Ilib\qt\include\QtCore /Ilib\qt\include\QtGui /Ilib\qt\include\QtOpenGL /Ilib\qt\include\QtOpenGLExtensions /Ilib\qt\include\QtPlatformSupport /Ilib\qt\include\QtUiTools /Ilib\qt\include\QtWidgets /Ilib\qt\include\QtZlib /Ilib\glfw\include /Ilib\GLM /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"tmp\Win32\Debug\\" /Fd"tmp\Win32\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt generated\moc_MainWindow.cpp src\Main.cpp src\MainWindow.cpp src\MultiSet.cpp src\Vector.cpp src\VectorField.cpp src\Volume.cpp
+         Volume.cpp
+         VectorField.cpp
+         Vector.cpp
+         MultiSet.cpp
          MainWindow.cpp
-         Code wird generiert...
-         Kompilieren...
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(204): error C2039: 'pushButtonFirstHit': Ist kein Element von 'Ui_MainWindow'
+                 c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\generated\ui_mainwindow.h(29): Siehe Deklaration von 'Ui_MainWindow'
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(209): error C2039: 'pushButtonFirstHit': Ist kein Element von 'Ui_MainWindow'
+                 c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\generated\ui_mainwindow.h(29): Siehe Deklaration von 'Ui_MainWindow'
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(209): error C2227: Links von "->setDisabled" muss sich ein Zeiger auf Klassen-/Struktur-/Union-/generischen Typ befinden.
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(282): error C2039: 'pushButtonFirstHit': Ist kein Element von 'Ui_MainWindow'
+                 c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\generated\ui_mainwindow.h(29): Siehe Deklaration von 'Ui_MainWindow'
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(282): error C2227: Links von "->setDisabled" muss sich ein Zeiger auf Klassen-/Struktur-/Union-/generischen Typ befinden.
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(398): error C2039: 'firstHit_label': Ist kein Element von 'Ui_MainWindow'
+                 c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\generated\ui_mainwindow.h(29): Siehe Deklaration von 'Ui_MainWindow'
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(398): error C2227: Links von "->setPixmap" muss sich ein Zeiger auf Klassen-/Struktur-/Union-/generischen Typ befinden.
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(400): error C2039: 'firstHit_label': Ist kein Element von 'Ui_MainWindow'
+                 c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\generated\ui_mainwindow.h(29): Siehe Deklaration von 'Ui_MainWindow'
+     1>c:\users\johanna\documents\medieninformatik_visualcomputing\7.semester\visualisierung1\git_projekt\visu\projekt\src\mainwindow.cpp(400): error C2227: Links von "->setFixedSize" muss sich ein Zeiger auf Klassen-/Struktur-/Union-/generischen Typ befinden.
          Main.cpp
          moc_MainWindow.cpp
          Code wird generiert...
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"bin\Win32\Debug\Visualisierung1.exe" /INCREMENTAL /NOLOGO /LIBPATH:lib\glew\lib /LIBPATH:lib\qt\lib\Win32 /LIBPATH:lib\glfw\lib glew32.lib opengl32.lib glu32.lib Qt5CLucened.lib Qt5Cored.lib Qt5Guid.lib Qt5OpenGLd.lib Qt5OpenGLExtensionsd.lib Qt5PlatformSupportd.lib Qt5UiToolsd.lib Qt5Widgetsd.lib qtmaind.lib glfw3dll.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"bin\Win32\Debug\Visualisierung1.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"bin\Win32\Debug\Visualisierung1.lib" /MACHINE:X86 tmp\Win32\Debug\moc_MainWindow.obj
-         tmp\Win32\Debug\Main.obj
-         tmp\Win32\Debug\MainWindow.obj
-         tmp\Win32\Debug\MultiSet.obj
-         tmp\Win32\Debug\Vector.obj
-         tmp\Win32\Debug\VectorField.obj
-         tmp\Win32\Debug\Volume.obj
-         Visualisierung1.vcxproj -> C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\bin\Win32\Debug\Visualisierung1.exe
-     1>Die Erstellung des Projekts "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\Visualisierung1.vcxproj" ist abgeschlossen, Build Ziel(e).
+     1>Die Erstellung des Projekts "C:\Users\Johanna\Documents\Medieninformatik_VisualComputing\7.Semester\Visualisierung1\Git_Projekt\Visu\Projekt\Visualisierung1.vcxproj" ist abgeschlossen, Rebuild Ziel(e) -- FEHLER.
 
-Build erfolgreich.
+Fehler beim Buildvorgang.
 
-Verstrichene Zeit 00:00:07.01
+Verstrichene Zeit 00:00:08.65
