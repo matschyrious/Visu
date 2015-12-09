@@ -46,6 +46,7 @@ protected:
 	void gpuRaycasting();
 
 	void firstHitRaycasting();
+	void alphaCompositing();
 
 
 private:

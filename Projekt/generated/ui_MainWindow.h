@@ -39,6 +39,9 @@ public:
     QPushButton *pushButtonCPU;
     QLabel *labelGradient;
     QLabel *labelAlpha;
+    QLabel *firstHit_label;
+    QPushButton *pushButtonFirstHit;
+    QPushButton *pushButtonAlphaComp;
     QMenuBar *menubar;
     QMenu *menuFile;
 
@@ -69,7 +72,7 @@ public:
         line->setFrameShadow(QFrame::Sunken);
         label = new QLabel(centralwidget);
         label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(20, 140, 391, 221));
+        label->setGeometry(QRect(10, 130, 441, 511));
         pushButtonGPU = new QPushButton(centralwidget);
         pushButtonGPU->setObjectName(QStringLiteral("pushButtonGPU"));
         pushButtonGPU->setGeometry(QRect(134, 90, 91, 23));
@@ -78,10 +81,19 @@ public:
         pushButtonCPU->setGeometry(QRect(20, 90, 91, 23));
         labelGradient = new QLabel(centralwidget);
         labelGradient->setObjectName(QStringLiteral("labelGradient"));
-        labelGradient->setGeometry(QRect(20, 410, 541, 251));
+        labelGradient->setGeometry(QRect(560, 410, 431, 261));
         labelAlpha = new QLabel(centralwidget);
         labelAlpha->setObjectName(QStringLiteral("labelAlpha"));
         labelAlpha->setGeometry(QRect(490, 140, 391, 201));
+        firstHit_label = new QLabel(centralwidget);
+        firstHit_label->setObjectName(QStringLiteral("firstHit_label"));
+        firstHit_label->setGeometry(QRect(540, 100, 431, 261));
+        pushButtonFirstHit = new QPushButton(centralwidget);
+        pushButtonFirstHit->setObjectName(QStringLiteral("pushButtonFirstHit"));
+        pushButtonFirstHit->setGeometry(QRect(250, 90, 111, 23));
+        pushButtonAlphaComp = new QPushButton(centralwidget);
+        pushButtonAlphaComp->setObjectName(QStringLiteral("pushButtonAlphaComp"));
+        pushButtonAlphaComp->setGeometry(QRect(390, 90, 101, 23));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
@@ -111,6 +123,9 @@ public:
         pushButtonCPU->setText(QApplication::translate("MainWindow", "cpu raycasting", 0));
         labelGradient->setText(QString());
         labelAlpha->setText(QString());
+        firstHit_label->setText(QString());
+        pushButtonFirstHit->setText(QApplication::translate("MainWindow", "first hit raycasting", 0));
+        pushButtonAlphaComp->setText(QApplication::translate("MainWindow", "alpha compositing", 0));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
     } // retranslateUi
 

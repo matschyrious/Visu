@@ -11,8 +11,6 @@
 #include <QGLShader>
 #include <array>
 
-#include <gl\GL.h>
-
 
 class GLWidget : public QGLWidget
 {
@@ -72,7 +70,7 @@ void GLWidget::initializeGL()
 
 	// Set the clear color to black
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
+	
 	glEnable(GL_DEPTH_TEST);
 	// Prepare a complete shader program…
 	program.addShaderFromSourceCode(QGLShader::Vertex,
@@ -153,6 +151,8 @@ void GLWidget::paintGL()
 	glBindTexture(GL_TEXTURE_3D, volumeData[0]);*/
 	unsigned int texture;
 	glGenTextures(1, &texture);
+	QGLFunctions glFuncs(QGLContext::currentContext());
+	glFuncs.glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_1D, texture);
 	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, volume.width() * volume.height() * volume.depth(), 0, GL_RGBA, GL_FLOAT, volumeData.data());
 
@@ -202,11 +202,13 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_Ui->pushButtonCPU, SIGNAL(clicked()), this, SLOT(cpuRaycasting()));
 	connect(m_Ui->pushButtonGPU, SIGNAL(clicked()), this, SLOT(gpuRaycasting()));
 	connect(m_Ui->pushButtonFirstHit, SIGNAL(clicked()), this, SLOT(firstHitRaycasting()));
+	connect(m_Ui->pushButtonAlphaComp, SIGNAL(clicked()), this, SLOT(alphaCompositing()));
 
 	if (m_Volume == nullptr){
 		m_Ui->pushButtonCPU->setDisabled(true);
 		m_Ui->pushButtonGPU->setDisabled(true);
 		m_Ui->pushButtonFirstHit->setDisabled(true);
+		m_Ui->pushButtonAlphaComp->setDisabled(true);
 	}
 }
 
@@ -280,8 +282,9 @@ void MainWindow::openFileAction()
 			m_Ui->pushButtonCPU->setDisabled(false);
 			m_Ui->pushButtonGPU->setDisabled(false);
 			m_Ui->pushButtonFirstHit->setDisabled(false);
+			m_Ui->pushButtonAlphaComp->setDisabled(false);
 
-			calculateGradient();
+			//calculateGradient();
 		}
 		else
 		{
@@ -302,68 +305,27 @@ void MainWindow::cpuRaycasting(){
 
 	QImage mip = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_RGB32);
 
-	QImage alphaImg = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_ARGB32);
-	QImage alphaImgA = alphaImg.alphaChannel();
-
 
 	for (int x = 0; x < m_Volume->width(); x++){
 		for (int y = 0; y < m_Volume->height(); y++){
-
-			float alpha = 0;
-			float prevAlpha = 0;
-			float r = 0;
-			float g = 0;
-			float b = 0;
 
 			for (int d = 0; d < m_Volume->depth(); d++){
 
 				float voxel = m_Volume->voxel(x, y, d).getValue();
 
-				
 				//MIP
 				mipData->at(x + (y*m_Volume->width())) =
 					std::fmax(mipData->at(x + (y*m_Volume->width())), voxel);
 				
-
-
-				//alpha 
-				
-				if (alpha < 255){
-					if (voxel > 0){
-						r = (255 * voxel);
-						g = 255 - (255 * voxel);
-						b = 255- (255 * voxel);
-
-						alphaImg.setPixel(x, y, alphaImg.pixel(x,y)+qRgb(r,g,b));
-						
-						float actAlpha = alpha;
-						alpha += (255 - prevAlpha) * voxel;
-						prevAlpha = (255-actAlpha) * voxel;
-						
-						if (alpha <= 255){
-							alphaImgA.setPixel(x, y, alpha);
-						}
-						else{
-							alphaImgA.setPixel(x, y, 255);
-						}
-						
-						alphaImg.setAlphaChannel(alphaImgA);
-					}
-				}
 			}
 
 			
-
 			float intensity = mipData->at(x + (y*m_Volume->width()));
 			mip.setPixel(x, y, qRgb(0, 0, 255 * intensity));
-
 
 		}
 	}
 
-	
-	m_Ui->labelAlpha->setPixmap(QPixmap::fromImage(alphaImg.scaled(alphaImg.size()*2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-	m_Ui->labelAlpha->setFixedSize(alphaImg.size()*2);
 
 	m_Ui->label->setPixmap(QPixmap::fromImage(mip.scaled(mip.size()*2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
 	m_Ui->label->setFixedSize(mip.size()*2);
@@ -394,8 +356,8 @@ void MainWindow::firstHitRaycasting(){
 		}
 	}
 
-	//m_Ui->firstHit_label->setPixmap(QPixmap::fromImage(firstHit.scaled()*2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-	m_Ui->firstHit_label->setPixmap(QPixmap::fromImage(firstHit));
+	m_Ui->firstHit_label->setPixmap(QPixmap::fromImage(firstHit.scaled(firstHit.size()*2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	//m_Ui->firstHit_label->setPixmap(QPixmap::fromImage(firstHit));
 
 	m_Ui->firstHit_label->setFixedSize(firstHit.size()*2);
 
@@ -436,6 +398,62 @@ void MainWindow::gpuRaycasting(){
 	}
 }
 
+void MainWindow::alphaCompositing(){
+
+	QImage alphaImg = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_ARGB32);
+	QImage alphaImgA = alphaImg.alphaChannel();
+
+	for (int x = 0; x < m_Volume->width(); x++){
+		for (int y = 0; y < m_Volume->height(); y++){
+
+			float alpha = 0;
+			float prevAlpha = 0;
+			float r = 0;
+			float g = 0;
+			float b = 0;
+
+			for (int z = 0; z < m_Volume->depth() && alpha < 255; z++){
+
+				float voxel = m_Volume->voxel(x, y, z).getValue();
+				//alpha 
+
+					if (voxel > 0){
+
+
+						r = 0; //-(255 * voxel);
+						g = 0;//255 - (255 * voxel);
+						b = 255;//255- (255 * voxel);
+
+						float actAlpha = alpha;
+						alpha += (255 - prevAlpha) * voxel;
+						prevAlpha = (255 - actAlpha) * voxel;
+
+						alphaImg.setPixel(x, y, alphaImg.pixel(x, y) + qRgba(r, g, b, alpha));
+
+						if (alpha > 255){
+							alpha = 255;
+						}
+
+						/*if (alpha <= 255){
+							alphaImgA.setPixel(x, y, alpha);
+						}
+						else{
+							alphaImgA.setPixel(x, y, 255);
+						}
+
+						alphaImg.setAlphaChannel(alphaImgA);*/
+					}
+				
+
+			}
+
+		}
+	}
+
+	m_Ui->labelAlpha->setPixmap(QPixmap::fromImage(alphaImg.scaled(alphaImg.size() * 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->labelAlpha->setFixedSize(alphaImg.size() * 2);
+
+}
 
 void MainWindow::calculateGradient(){
 	int gx, gy, gz;
