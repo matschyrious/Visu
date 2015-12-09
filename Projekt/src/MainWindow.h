@@ -46,6 +46,8 @@ protected:
 	void gpuRaycasting();
 
 	void firstHitRaycasting();
+	void averageRaycasting();
+	void alphaCompositing();
 
 
 private:
@@ -79,6 +81,7 @@ private:
 	
 	std::vector<float> *alphaData; //for saving alpha values
 	std::vector<float> *firstHitData; //for saving max values
+	std::vector<float> *avgData; //for saving max values
 
 	std::vector<float> volume_points;
 
