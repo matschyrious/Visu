@@ -368,9 +368,9 @@ void MainWindow::firstHitRaycasting(){
 		}
 	}
 
-	m_Ui->firstHit_label->setPixmap(QPixmap::fromImage(firstHit.scaled(firstHit.size()*3, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->label->setPixmap(QPixmap::fromImage(firstHit.scaled(firstHit.size() * 3, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
 	
-	m_Ui->firstHit_label->setFixedSize(firstHit.size()*3);
+	m_Ui->label->setFixedSize(firstHit.size() * 3);
 
 }
 void MainWindow::averageRaycasting(){
@@ -402,9 +402,9 @@ void MainWindow::averageRaycasting(){
 		}
 	}
 
-	m_Ui->firstHit_label->setPixmap(QPixmap::fromImage(avg.scaled(avg.size() * 3, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->label->setPixmap(QPixmap::fromImage(avg.scaled(avg.size() * 3, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
 
-	m_Ui->firstHit_label->setFixedSize(avg.size() * 3);
+	m_Ui->label->setFixedSize(avg.size() * 3);
 
 }
 
@@ -495,8 +495,8 @@ void MainWindow::alphaCompositing(){
 		}
 	}
 
-	m_Ui->labelAlpha->setPixmap(QPixmap::fromImage(alphaImg.scaled(alphaImg.size() * 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-	m_Ui->labelAlpha->setFixedSize(alphaImg.size() * 2);
+	m_Ui->label->setPixmap(QPixmap::fromImage(alphaImg.scaled(alphaImg.size() * 3, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->label->setFixedSize(alphaImg.size() * 3);
 
 }
 
