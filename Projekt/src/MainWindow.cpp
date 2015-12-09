@@ -10,10 +10,13 @@
 #include <QGLBuffer>
 #include <QGLShader>
 
+#include <gl\GL.h>
+
+
 class GLWidget : public QGLWidget
 {
 public:
-	GLWidget(const QGLFormat& format, QWidget *parent, std::vector<float> volume_data /*Volume volume*/);
+	GLWidget(const QGLFormat& format, QWidget *parent, Volume volume);
 
 protected:
 	virtual void initializeGL();
@@ -25,13 +28,15 @@ protected:
 private:
 	QGLShaderProgram program;
 	QGLBuffer m_vertexBuffer;
-	std::vector<GLfloat> volume_data;
 	Volume volume;
 	QMatrix4x4 matrix;
+	std::vector<float> volumeData;
+	std::vector<float> texCoords;
+	std::vector<GLfloat> vertices;
 };
 
-GLWidget::GLWidget(const QGLFormat& format, QWidget *parent, std::vector<float> volume_data/*Volume volume*/)
-	: QGLWidget(format), volume_data(volume_data), m_vertexBuffer(QGLBuffer::VertexBuffer)
+GLWidget::GLWidget(const QGLFormat& format, QWidget *parent, Volume volume)
+	: QGLWidget(format), volume(volume), m_vertexBuffer(QGLBuffer::VertexBuffer)
 {
 	setWindowTitle(tr("GPU Raycasting"));
 
@@ -39,29 +44,57 @@ GLWidget::GLWidget(const QGLFormat& format, QWidget *parent, std::vector<float> 
 
 void GLWidget::initializeGL()
 {
-	QGLFormat glFormat = QGLWidget::format();
-	if (!glFormat.sampleBuffers())
+	float halfW = volume.width() / 2;
+	float halfH = volume.height() / 2;
+	float halfD = volume.depth() / 2;
+
+	vertices;
+	
+	for (int x = 0; x < volume.width(); x++){
+		for (int y = 0; y < volume.height(); y++){
+			for (int z = 0; z < volume.depth(); z++){
+				vertices.push_back((float)(-halfW + x) / halfW);
+				vertices.push_back((float)(-halfH + y) / halfH);
+				vertices.push_back((float)(-halfD + z) / halfD);
+				vertices.push_back(1.0);
+				volumeData.push_back(volume.voxel(x, y, z).getValue());
+				/*texCoords.push_back(x);
+				texCoords.push_back(y);
+				texCoords.push_back(z);*/
+			}
+		}
+	}
+
+	
+	if (!QGLWidget::format().sampleBuffers())
 		qWarning() << "Could not enable sample buffers";
 
 	// Set the clear color to black
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+	glEnable(GL_DEPTH_TEST);
 	// Prepare a complete shader program…
 	program.addShaderFromSourceCode(QGLShader::Vertex,
 		"#version 330 \n"
 		"in vec4 vertex;\n"
+		//"in vec3 texCoords;\n"
 		"uniform mat4 matrix;\n"
+		"out vec3 texCoordsV;\n"
 		"void main(void)\n"
 		"{ \n"
-		"vec4 n_vertex = normalize(vertex);"
+		"vec4 n_vertex = normalize(vertex);\n"
+		"texCoordsV = vec3(n_vertex);\n"
 		"gl_Position = matrix *n_vertex;\n"
 		"}");
 	program.addShaderFromSourceCode(QGLShader::Fragment,
 		"#version 330 \n"
+		"in vec3 texCoordsV;\n"
 		"layout(location = 0, index = 0) out vec4 fragColor;\n"
+		"uniform sampler1D intensityTexture;\n"
 		"void main(void)\n"
 		"{ \n"
-		"fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+		"vec4 intensity = texture(intensityTexture, texCoordsV.x+texCoordsV.y+texCoordsV.z);\n"
+		"fragColor = vec4(1.0,0,0, 1.0);\n"
 		"}");
 
 	program.link();
@@ -74,7 +107,7 @@ void GLWidget::initializeGL()
 		qWarning() << "Could not bind vertex buffer to the context";
 		return;
 	}
-	m_vertexBuffer.allocate(&volume_data[0], volume_data.size()* sizeof(float));
+	m_vertexBuffer.allocate(&vertices[0], vertices.size()* sizeof(float));
 
 	// Bind the shader program so that we can associate variables from
 	// our application to the shaders
@@ -90,10 +123,14 @@ void GLWidget::initializeGL()
 		0, 1, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1);
-
+		
 	program.setUniformValue("matrix", matrix);
 	program.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
 	program.enableAttributeArray("vertex");
+	QGLFunctions glFuncs(QGLContext::currentContext());
+	m_vertexBuffer.bind();
+	
+
 }
 
 void GLWidget::resizeGL(int w, int h)
@@ -108,13 +145,21 @@ void GLWidget::paintGL()
 	// Clear the buffer with the current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	m_vertexBuffer.bind();
-	program.setUniformValue("matrix", matrix);
-	program.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
-	program.enableAttributeArray("vertex");
+	/*Texture
+	glEnable(GL_TEXTURE_3D);
+	QGLFunctions glFuncs(QGLContext::currentContext());
+	glFuncs.glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_3D, volumeData[0]);*/
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_1D, texture);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, volume.width() * volume.height() * volume.depth(), 0, GL_RGBA, GL_FLOAT, volumeData.data());
+
 
 	// Draw stuff
-	glDrawArrays(GL_POINTS, 0, volume_data.size());
+
+	glDrawArrays(GL_POINTS, 0, volume.size());
+
 }
 
 void GLWidget::keyPressEvent(QKeyEvent* e)
@@ -232,7 +277,7 @@ void MainWindow::openFileAction()
 			m_Ui->pushButtonCPU->setDisabled(false);
 			m_Ui->pushButtonGPU->setDisabled(false);
 
-			calculateGradient();
+			//calculateGradient();
 		}
 		else
 		{
@@ -261,27 +306,50 @@ void MainWindow::cpuRaycasting(){
 		for (int y = 0; y < m_Volume->height(); y++){
 
 			float alpha = 0;
+			float prevAlpha = 0;
+			float r = 0;
+			float g = 0;
+			float b = 0;
 
 			for (int d = 0; d < m_Volume->depth(); d++){
 
 				float voxel = m_Volume->voxel(x, y, d).getValue();
 
+				
 				//MIP
 				mipData->at(x + (y*m_Volume->width())) =
 					std::fmax(mipData->at(x + (y*m_Volume->width())), voxel);
+				
 
 
 				//alpha 
-				/*
-				if (alpha <= 255){
-				if (voxel > 0){
+				
+				if (alpha < 255){
+					if (voxel > 0){
+						r = (255 * voxel);
+						g = 255 - (255 * voxel);
+						b = 255- (255 * voxel);
 
-				alphaImg.setPixel(x, y, qRgb(255 -(255* voxel), 255-(255*voxel), 255 * voxel ));
-				alpha += 255 * m_Volume->voxel(x, y, d).getValue();
+						alphaImg.setPixel(x, y, alphaImg.pixel(x,y)+qRgb(r,g,b));
+						
+						float actAlpha = alpha;
+						alpha += (255 - prevAlpha) * voxel;
+						prevAlpha = (255-actAlpha) * voxel;
+						
+						if (alpha <= 255){
+							alphaImgA.setPixel(x, y, alpha);
+						}
+						else{
+							alphaImgA.setPixel(x, y, 255);
+						}
+						
+						alphaImg.setAlphaChannel(alphaImgA);
+					}
 				}
-				}*/
-
 			}
+
+			
+
 			float intensity = mipData->at(x + (y*m_Volume->width()));
 			mip.setPixel(x, y, qRgb(0, 0, 255*intensity));
 			
@@ -289,33 +357,16 @@ void MainWindow::cpuRaycasting(){
 		}
 	}
 
+	
+	m_Ui->labelAlpha->setPixmap(QPixmap::fromImage(alphaImg.scaled(alphaImg.size()*2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->labelAlpha->setFixedSize(alphaImg.size()*2);
 
-	//m_Ui->label_2->setPixmap(QPixmap::fromImage(alphaImg));
-	//m_Ui->label_2->setFixedSize(alphaImg.size());
-
-
-	m_Ui->label->setPixmap(QPixmap::fromImage(mip));
-	m_Ui->label->setFixedSize(mip.size());
+	m_Ui->label->setPixmap(QPixmap::fromImage(mip.scaled(mip.size()*2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->label->setFixedSize(mip.size()*2);
 
 }
 
 void MainWindow::gpuRaycasting(){
-
-	volume_points.clear();
-	
-	for (int x = 0; x < m_Volume->width(); x++){
-		for (int y = 0; y < m_Volume->height(); y++){
-			for (int z = 0; z < m_Volume->depth(); z++){
-				if (m_Volume->voxel(x, y, z).getValue() > 0){
-					
-						volume_points.push_back((float)(-(m_Volume->width() / 2) + x) / m_Volume->width() / 2);
-						volume_points.push_back((float)(-(m_Volume->height() / 2) + y) / m_Volume->height() / 2);
-						volume_points.push_back((float)(-(m_Volume->depth() / 2) + z) / m_Volume->depth() / 2);
-						volume_points.push_back(1.0f);
-				}
-			}
-		}
-	}
 
 	if (m_Volume->size() > 0){
 		QGLFormat f = QGLFormat::defaultFormat();
@@ -332,7 +383,7 @@ void MainWindow::gpuRaycasting(){
 		glFormat.setSampleBuffers(true);
 
 		// Create a GLWidget requesting our format
-		GLWidget widget(glFormat, 0, volume_points/*m_Volume*/);
+		GLWidget widget(glFormat, 0, *m_Volume);
 
 		if (!widget.format().sampleBuffers()) {
 			QMessageBox::information(0, "OpenGL samplebuffers",

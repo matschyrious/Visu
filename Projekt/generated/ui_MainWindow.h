@@ -38,6 +38,7 @@ public:
     QPushButton *pushButtonGPU;
     QPushButton *pushButtonCPU;
     QLabel *labelGradient;
+    QLabel *labelAlpha;
     QMenuBar *menubar;
     QMenu *menuFile;
 
@@ -78,6 +79,9 @@ public:
         labelGradient = new QLabel(centralwidget);
         labelGradient->setObjectName(QStringLiteral("labelGradient"));
         labelGradient->setGeometry(QRect(20, 410, 541, 251));
+        labelAlpha = new QLabel(centralwidget);
+        labelAlpha->setObjectName(QStringLiteral("labelAlpha"));
+        labelAlpha->setGeometry(QRect(490, 140, 391, 201));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
@@ -106,6 +110,7 @@ public:
         pushButtonGPU->setText(QApplication::translate("MainWindow", "gpu raycasting", 0));
         pushButtonCPU->setText(QApplication::translate("MainWindow", "cpu raycasting", 0));
         labelGradient->setText(QString());
+        labelAlpha->setText(QString());
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
     } // retranslateUi
 
