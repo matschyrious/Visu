@@ -64,8 +64,8 @@
      <rect>
       <x>20</x>
       <y>140</y>
-      <width>391</width>
-      <height>221</height>
+      <width>441</width>
+      <height>511</height>
      </rect>
     </property>
     <property name="text">
@@ -101,14 +101,40 @@
    <widget class="QLabel" name="labelGradient">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>560</x>
       <y>410</y>
-      <width>541</width>
-      <height>251</height>
+      <width>431</width>
+      <height>261</height>
      </rect>
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="firstHit_label">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>100</y>
+      <width>431</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonFirstHit">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>90</y>
+      <width>111</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>first hit raycasting</string>
     </property>
    </widget>
   </widget>
