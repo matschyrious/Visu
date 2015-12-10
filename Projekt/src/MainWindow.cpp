@@ -204,6 +204,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_Ui->pushButtonFirstHit, SIGNAL(clicked()), this, SLOT(firstHitRaycasting()));
 	connect(m_Ui->pushButtonAlphaComp, SIGNAL(clicked()), this, SLOT(alphaCompositing()));
 	connect(m_Ui->pushButtonAverage, SIGNAL(clicked()), this, SLOT(averageRaycasting()));
+	connect(m_Ui->slider_IncreaseIntensity, SIGNAL(valueChanged(int)), this, SLOT(setTooltip(int)));
 
 	if (m_Volume == nullptr){
 		m_Ui->pushButtonCPU->setDisabled(true);
@@ -368,9 +369,9 @@ void MainWindow::firstHitRaycasting(){
 		}
 	}
 
-	m_Ui->label->setPixmap(QPixmap::fromImage(firstHit.scaled(firstHit.size() * 3, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->label->setPixmap(QPixmap::fromImage(firstHit.scaled(firstHit.size() * 2.5, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
 	
-	m_Ui->label->setFixedSize(firstHit.size() * 3);
+	m_Ui->label->setFixedSize(firstHit.size() * 2.5);
 
 }
 void MainWindow::averageRaycasting(){
@@ -402,9 +403,9 @@ void MainWindow::averageRaycasting(){
 		}
 	}
 
-	m_Ui->label->setPixmap(QPixmap::fromImage(avg.scaled(avg.size() * 3, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->label->setPixmap(QPixmap::fromImage(avg.scaled(avg.size() * 2.5, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
 
-	m_Ui->label->setFixedSize(avg.size() * 3);
+	m_Ui->label->setFixedSize(avg.size() * 2.5);
 
 }
 
@@ -456,13 +457,13 @@ void MainWindow::alphaCompositing(){
 			float alphaA = 0;
 			float alphaB = 0;
 			float alphaC = 0;
-			float rA = 0, rB = 0;
-			float gA =0, gB = 0;
-			float bA = 0, bB = 0;
-			alphaA = 252;
+			float rB = 0;
+			float gB = 0;
+			float bB = 0;
 			for (int z = 0; z < m_Volume->depth() && alphaA < 255; z++){
 
 				float voxel = m_Volume->voxel(x, y, z).getValue();
+				voxel = voxel * m_Ui->slider_IncreaseIntensity->value();
 				//alpha 
 
 				
@@ -477,23 +478,28 @@ void MainWindow::alphaCompositing(){
 				//
 
 
-				rA = 0, rB = 0;
-				gA = 0, gB = 0;
-				bA = 0, bB = 0;
+				rB = 255;
+				gB = 211;
+				bB = 155;
+
+
 
 				alphaB = 255 * voxel;
 
 				alphaC = alphaA + ((255 - alphaA)*alphaB);
 
 				if(z == 0){
-					alphaImg.setPixel(x, y, qRgba(rA, gA, bA, 255 - alphaB));
+					alphaImg.setPixel(x, y, qRgba(rB, gB, bB, alphaB));
 				}
 				else{
-
+					float newAlpha = 0;
+					if (alphaA > 0 || alphaB > 0){
+						newAlpha= (1 / alphaC)*(255 - alphaA + alphaB);
+					}
 					alphaImg.setPixel(x, y,
-						(qRgba(rB, gB, bB, 255 - alphaA + alphaB)));
+						(qRgba(rB, gB, bB, newAlpha)));
 
-					alphaA += alphaB;
+					alphaA += newAlpha;
 				}
 			}
 
@@ -504,6 +510,10 @@ void MainWindow::alphaCompositing(){
 	m_Ui->label->setPixmap(QPixmap::fromImage(alphaImg.scaled(alphaImg.size() * 2.5, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
 	m_Ui->label->setFixedSize(alphaImg.size() * 2.5);
 
+}
+
+void MainWindow::setTooltip(int value){
+	m_Ui->label_sliderValue->setText(QString::number(value));
 }
 
 void MainWindow::calculateGradient(){
@@ -551,8 +561,8 @@ void MainWindow::calculateGradient(){
 		}
 	}
 
-	m_Ui->labelGradient->setPixmap(QPixmap::fromImage(gradient));
-	m_Ui->labelGradient->setFixedSize(gradient.size());
+	m_Ui->label->setPixmap(QPixmap::fromImage(gradient));
+	m_Ui->label->setFixedSize(gradient.size());
 
 	std::cout << "fertig mit gradient berechnung" << std::endl;
 

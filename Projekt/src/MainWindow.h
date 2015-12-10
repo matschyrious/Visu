@@ -48,7 +48,7 @@ protected:
 	void firstHitRaycasting();
 	void averageRaycasting();
 	void alphaCompositing();
-
+	void setTooltip(int value);
 
 private:
 

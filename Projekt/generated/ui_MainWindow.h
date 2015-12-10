@@ -21,6 +21,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -37,12 +38,12 @@ public:
     QLabel *label;
     QPushButton *pushButtonGPU;
     QPushButton *pushButtonCPU;
-    QLabel *labelGradient;
-    QLabel *labelAlpha;
-    QLabel *firstHit_label;
     QPushButton *pushButtonFirstHit;
     QPushButton *pushButtonAlphaComp;
     QPushButton *pushButtonAverage;
+    QSlider *slider_IncreaseIntensity;
+    QLabel *label_2;
+    QLabel *label_sliderValue;
     QMenuBar *menubar;
     QMenu *menuFile;
 
@@ -73,22 +74,13 @@ public:
         line->setFrameShadow(QFrame::Sunken);
         label = new QLabel(centralwidget);
         label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(10, 80, 841, 701));
+        label->setGeometry(QRect(10, 80, 731, 701));
         pushButtonGPU = new QPushButton(centralwidget);
         pushButtonGPU->setObjectName(QStringLiteral("pushButtonGPU"));
         pushButtonGPU->setGeometry(QRect(120, 40, 91, 23));
         pushButtonCPU = new QPushButton(centralwidget);
         pushButtonCPU->setObjectName(QStringLiteral("pushButtonCPU"));
         pushButtonCPU->setGeometry(QRect(20, 40, 91, 23));
-        labelGradient = new QLabel(centralwidget);
-        labelGradient->setObjectName(QStringLiteral("labelGradient"));
-        labelGradient->setGeometry(QRect(560, 410, 431, 261));
-        labelAlpha = new QLabel(centralwidget);
-        labelAlpha->setObjectName(QStringLiteral("labelAlpha"));
-        labelAlpha->setGeometry(QRect(490, 430, 391, 201));
-        firstHit_label = new QLabel(centralwidget);
-        firstHit_label->setObjectName(QStringLiteral("firstHit_label"));
-        firstHit_label->setGeometry(QRect(520, 130, 431, 261));
         pushButtonFirstHit = new QPushButton(centralwidget);
         pushButtonFirstHit->setObjectName(QStringLiteral("pushButtonFirstHit"));
         pushButtonFirstHit->setGeometry(QRect(360, 40, 111, 23));
@@ -98,6 +90,18 @@ public:
         pushButtonAverage = new QPushButton(centralwidget);
         pushButtonAverage->setObjectName(QStringLiteral("pushButtonAverage"));
         pushButtonAverage->setGeometry(QRect(220, 40, 131, 23));
+        slider_IncreaseIntensity = new QSlider(centralwidget);
+        slider_IncreaseIntensity->setObjectName(QStringLiteral("slider_IncreaseIntensity"));
+        slider_IncreaseIntensity->setGeometry(QRect(780, 110, 191, 19));
+        slider_IncreaseIntensity->setMinimum(1);
+        slider_IncreaseIntensity->setMaximum(1000);
+        slider_IncreaseIntensity->setOrientation(Qt::Horizontal);
+        label_2 = new QLabel(centralwidget);
+        label_2->setObjectName(QStringLiteral("label_2"));
+        label_2->setGeometry(QRect(760, 80, 111, 16));
+        label_sliderValue = new QLabel(centralwidget);
+        label_sliderValue->setObjectName(QStringLiteral("label_sliderValue"));
+        label_sliderValue->setGeometry(QRect(947, 140, 20, 20));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
@@ -125,12 +129,11 @@ public:
         label->setText(QString());
         pushButtonGPU->setText(QApplication::translate("MainWindow", "gpu raycasting", 0));
         pushButtonCPU->setText(QApplication::translate("MainWindow", "cpu raycasting", 0));
-        labelGradient->setText(QString());
-        labelAlpha->setText(QString());
-        firstHit_label->setText(QString());
         pushButtonFirstHit->setText(QApplication::translate("MainWindow", "first hit raycasting", 0));
         pushButtonAlphaComp->setText(QApplication::translate("MainWindow", "alpha compositing", 0));
         pushButtonAverage->setText(QApplication::translate("MainWindow", "average value raycasting", 0));
+        label_2->setText(QApplication::translate("MainWindow", "Intensit\303\244tsverst\303\244rkung", 0));
+        label_sliderValue->setText(QApplication::translate("MainWindow", "1", 0));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
     } // retranslateUi
 
