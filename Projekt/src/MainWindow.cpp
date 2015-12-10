@@ -10,6 +10,7 @@
 #include <QGLBuffer>
 #include <QGLShader>
 #include <array>
+#include <gtc\matrix_transform.hpp>
 
 
 class GLWidget : public QGLWidget
@@ -204,6 +205,10 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_Ui->pushButtonFirstHit, SIGNAL(clicked()), this, SLOT(firstHitRaycasting()));
 	connect(m_Ui->pushButtonAlphaComp, SIGNAL(clicked()), this, SLOT(alphaCompositing()));
 	connect(m_Ui->pushButtonAverage, SIGNAL(clicked()), this, SLOT(averageRaycasting()));
+	
+	m_Ui->slider_IncreaseIntensity->hide();
+	m_Ui->label_sliderValue->hide();
+	m_Ui->label_2->hide();
 	connect(m_Ui->slider_IncreaseIntensity, SIGNAL(valueChanged(int)), this, SLOT(setTooltip(int)));
 
 	if (m_Volume == nullptr){
@@ -448,7 +453,6 @@ void MainWindow::alphaCompositing(){
 
 	QImage alphaImg = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_ARGB32);
 	QImage alphaImgA = alphaImg.alphaChannel();
-	alphaImg.fill(qRgba(0, 0, 0, 255));
 
 	for (int x = 0; x < m_Volume->width(); x++){
 		for (int y = 0; y < m_Volume->height(); y++){
@@ -457,16 +461,16 @@ void MainWindow::alphaCompositing(){
 			float alphaA = 0;
 			float alphaB = 0;
 			float alphaC = 0;
+			float rA = 0;
+			float gA = 0;
+			float bA = 0;
 			float rB = 0;
 			float gB = 0;
 			float bB = 0;
 			for (int z = 0; z < m_Volume->depth() && alphaA < 255; z++){
 
 				float voxel = m_Volume->voxel(x, y, z).getValue();
-				voxel = voxel * m_Ui->slider_IncreaseIntensity->value();
 				//alpha 
-
-				
 
 				//C ... new non-transparent Color
 				//alphaA ... alpha value of Ac
@@ -477,29 +481,23 @@ void MainWindow::alphaCompositing(){
 				//alphaC = alphaA + (1 - alphaA)*alphaB
 				//
 
-
-				rB = 255;
-				gB = 211;
-				bB = 155;
-
-
-
 				alphaB = 255 * voxel;
 
-				alphaC = alphaA + ((255 - alphaA)*alphaB);
 
-				if(z == 0){
-					alphaImg.setPixel(x, y, qRgba(rB, gB, bB, alphaB));
+				if (z == 0){
+						alphaImg.setPixel(x, y, qRgba(rA, gA, bA, alphaB));
+						alphaA += alphaB;
 				}
 				else{
+					alphaC = (alphaA + ((255 - alphaA)*alphaB))/255;
 					float newAlpha = 0;
 					if (alphaA > 0 || alphaB > 0){
-						newAlpha= (1 / alphaC)*(255 - alphaA + alphaB);
+						newAlpha= (1 / alphaC)*((255 - alphaA )* alphaB);
 					}
-					alphaImg.setPixel(x, y,
-						(qRgba(rB, gB, bB, newAlpha)));
+					alphaImg.setPixel(x, y, alphaImg.pixel(x,y) +
+						(qRgba(rB, gB, bB, alphaB)));
 
-					alphaA += newAlpha;
+					alphaA += alphaC;
 				}
 			}
 
@@ -514,6 +512,30 @@ void MainWindow::alphaCompositing(){
 
 void MainWindow::setTooltip(int value){
 	m_Ui->label_sliderValue->setText(QString::number(value));
+}
+
+void MainWindow::rotateInY(){
+
+
+}
+
+void MainWindow::rotateInZ(){
+
+}
+
+void MainWindow::rotateInX(){
+	glm::mat4 model = glm::mat4(1.0f);
+	glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+
+	for (int x = 0; x < m_Volume->width(); x++){
+		for (int y = 0; y < m_Volume->width(); y++){
+			for (int z = 0; z < m_Volume->width(); z++){
+
+			}
+		}
+	}
+
+
 }
 
 void MainWindow::calculateGradient(){

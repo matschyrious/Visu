@@ -7,6 +7,7 @@
 #include "VectorField.h"
 #include "MultiSet.h"
 #include "Vector.h"
+#include <glm.hpp>
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -50,6 +51,10 @@ protected:
 	void alphaCompositing();
 	void setTooltip(int value);
 
+	void rotateInX();
+	void rotateInY();
+	void rotateInZ();
+
 private:
 
 	// USER INTERFACE ELEMENTS
@@ -82,6 +87,9 @@ private:
 	std::vector<float> *alphaData; //for saving alpha values
 	std::vector<float> *firstHitData; //for saving max values
 	std::vector<float> *avgData; //for saving max values
+	std::vector<glm::vec3> *rotateX;
+	std::vector<glm::vec3> *rotateY;
+	std::vector<glm::vec3> *rotateZ;
 
 	std::vector<float> volume_points;
 
