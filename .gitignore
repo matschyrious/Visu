@@ -1,7 +1,7 @@
 /Projekt/bin
-/Projekt/build*
-
 /Projekt/*.sdf
-
+/Projekt/*.opensdf
 /Projekt/*.user
 /Projekt/*.suo
+
+/Projekt/tmp

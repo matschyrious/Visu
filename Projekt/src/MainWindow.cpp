@@ -447,56 +447,62 @@ void MainWindow::alphaCompositing(){
 
 	QImage alphaImg = QImage(m_Volume->width(), m_Volume->height(), QImage::Format::Format_ARGB32);
 	QImage alphaImgA = alphaImg.alphaChannel();
+	alphaImg.fill(qRgba(0, 0, 0, 255));
 
 	for (int x = 0; x < m_Volume->width(); x++){
 		for (int y = 0; y < m_Volume->height(); y++){
 
-			float alpha = 0;
-			float prevAlpha = 0;
-			float r = 0;
-			float g = 0;
-			float b = 0;
-
-			for (int z = 0; z < m_Volume->depth() && alpha < 255; z++){
+			float alphaSum = 0;
+			float alphaA = 0;
+			float alphaB = 0;
+			float alphaC = 0;
+			float rA = 0, rB = 0;
+			float gA =0, gB = 0;
+			float bA = 0, bB = 0;
+			alphaA = 252;
+			for (int z = 0; z < m_Volume->depth() && alphaA < 255; z++){
 
 				float voxel = m_Volume->voxel(x, y, z).getValue();
 				//alpha 
 
-					if (voxel > 0){
-
-
-						r = 0; //-(255 * voxel);
-						g = 0;//255 - (255 * voxel);
-						b = 255;//255- (255 * voxel);
-
-						float actAlpha = alpha;
-						alpha += (255 - prevAlpha) * voxel;
-						prevAlpha = (255 - actAlpha) * voxel;
-
-						alphaImg.setPixel(x, y, alphaImg.pixel(x, y) + qRgba(r, g, b, alpha));
-
-						if (alpha > 255){
-							alpha = 255;
-						}
-
-						/*if (alpha <= 255){
-							alphaImgA.setPixel(x, y, alpha);
-						}
-						else{
-							alphaImgA.setPixel(x, y, 255);
-						}
-
-						alphaImg.setAlphaChannel(alphaImgA);*/
-					}
 				
 
+				//C ... new non-transparent Color
+				//alphaA ... alpha value of Ac
+				//Ac ... color value of first color A
+				//Bc ... color value of second color B
+				//alpha compositing for two colors - C = alphaA * Ac + (1-alphaA)*Bc
+				//for two trsanparent colors Ac and Bc with over operator - C = 1/alphaC * (alphaA * Ac + (1 - alphaA)*alphaB * Bc)
+				//alphaC = alphaA + (1 - alphaA)*alphaB
+				//
+
+
+				rA = 0, rB = 0;
+				gA = 0, gB = 0;
+				bA = 0, bB = 0;
+
+				alphaB = 255 * voxel;
+
+				alphaC = alphaA + ((255 - alphaA)*alphaB);
+
+				if(z == 0){
+					alphaImg.setPixel(x, y, qRgba(rA, gA, bA, 255 - alphaB));
+				}
+				else{
+
+					alphaImg.setPixel(x, y,
+						(qRgba(rB, gB, bB, 255 - alphaA + alphaB)));
+
+					alphaA += alphaB;
+				}
 			}
 
 		}
 	}
+	std::cout << "fertig alpha comp" << std::endl;
 
-	m_Ui->label->setPixmap(QPixmap::fromImage(alphaImg.scaled(alphaImg.size() * 3, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-	m_Ui->label->setFixedSize(alphaImg.size() * 3);
+	m_Ui->label->setPixmap(QPixmap::fromImage(alphaImg.scaled(alphaImg.size() * 2.5, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+	m_Ui->label->setFixedSize(alphaImg.size() * 2.5);
 
 }
 
